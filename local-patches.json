@@ -1,0 +1,36 @@
+{
+  "$comment": "Machine-readable state for the local patch stack. Managed by scripts/sync-local-patches.ps1; agents must read this before branching and keep it in sync. Full policy: docs/local-branch-strategy.md",
+  "policy": "patch-stack",
+  "strategyDoc": "docs/local-branch-strategy.md",
+  "syncScript": "scripts/sync-local-patches.ps1",
+  "baseline": "v2.0.13",
+  "branch": "local/pi-ai-model-patch",
+  "pushRemote": "fork",
+  "neverPushRemotes": ["origin", "mirror"],
+  "installedAppProbe": "C:\\Program Files\\DSH Desktop\\resources\\app\\package.json",
+  "patches": [
+    {
+      "id": "pi-ai-model-patch",
+      "summary": "pi-ai 0.85.1 opencode-go.json: add deepseek-v4.1-flash model entry (openai-completions)",
+      "mechanism": "resolutions + patches/pi-ai@0.85.1.patch",
+      "files": [
+        "patches/pi-ai@0.85.1.patch",
+        "package.json",
+        "yarn.lock"
+      ]
+    }
+  ],
+  "verify": [
+    {
+      "name": "pi-ai patched model present after install+build",
+      "file": "dsh-plugin-desktop/node_modules/@earendil-works/pi-ai/dist/providers/data/opencode-go.json",
+      "mustContain": "deepseek-v4.1-flash"
+    }
+  ],
+  "build": {
+    "install": "yarn install",
+    "command": "yarn workspace dsh-plugin-desktop run build",
+    "npmRegistryServer": "https://nexus.uihcloud.cn/repository/npm-group/",
+    "notes": "corepack may hang on this machine; prefer running the cached yarn bundle directly (see scripts/sync-local-patches.ps1 -YarnJs)."
+  }
+}

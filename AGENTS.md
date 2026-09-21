@@ -29,3 +29,11 @@ This repository owns the desktop product around an unmodified DeepSeek Harness c
 - Keep graphical application launch explicit. Builds, typechecks, unit tests, and Loader smokes must remain headless-safe.
 - Commit before major changes of direction and keep the submodule pin update separate from desktop behavior changes.
 - Keep the repository topology and package-manager split consistent with the [owning Agent Note](.agents/notes/implemented/process/2026-08-15-pinned-upstream-and-isolated-yarn-workspace.md).
+
+## Local patch branches
+
+- This checkout carries local-only commits on top of an upstream release tag. Read `local-patches.json` (baseline tag, patch list, verify rules) and `docs/local-branch-strategy.md` before creating or moving any branch. The baseline follows the *installed* DSH Desktop release tag, never `main`.
+- Agents must auto-detect drift on arrival: compare `baseline` in `local-patches.json` against the version at `installedAppProbe`. On mismatch, propose `scripts/sync-local-patches.ps1 -Check` first, then run it without `-Check` to fetch the tag, cherry-pick the patch stack, rebuild, verify, and refresh the manifest.
+- Local patch branches are pushed only to the `fork` remote. Never push `origin` (upstream) or `mirror`.
+- Any new local customization must land as its own commit series, update `local-patches.json` (`patches` + `verify`), and, when it changes the workflow, `docs/local-branch-strategy.md`.
+- Generated build artifacts that dirty the tree (for example `dsh-plugin-desktop/build/app-icon.ico`) should be restored with `git restore` before committing.
