@@ -153,15 +153,21 @@ git add local-patches.json
 git -c user.name='KAITO-XI' -c user.email='KAITO-XI@users.noreply.github.com' commit -m "chore(local): sync patches onto $TargetVersion"
 if ($LASTEXITCODE -ne 0) { throw 'manifest commit failed' }
 
-# --- 8. push --------------------------------------------------------------------
-$pushRemote = $manifest.pushRemote
-if ((git remote) -contains $pushRemote) {
+# --- 8. push (fork first, then the private backup) ------------------------------
+$targets = @()
+if ($manifest.pushRemote) { $targets += $manifest.pushRemote }
+if ($manifest.backupRemote -and ($manifest.backupRemote -ne $manifest.pushRemote)) { $targets += $manifest.backupRemote }
+foreach ($remoteName in $targets) {
+  if ((git remote) -notcontains $remoteName) {
+    "remote '$remoteName' not configured - push manually: git push $remoteName $newBranch"
+    continue
+  }
+  $pushed = $false
   foreach ($attempt in 1..3) {
-    git push $pushRemote $newBranch
-    if ($LASTEXITCODE -eq 0) { "pushed $newBranch to $pushRemote"; break }
+    git push $remoteName $newBranch
+    if ($LASTEXITCODE -eq 0) { "pushed $newBranch to $remoteName"; $pushed = $true; break }
     Start-Sleep -Seconds 5
   }
-} else {
-  "remote '$pushRemote' not configured - push manually: git push $pushRemote $newBranch"
+  if (-not $pushed) { "WARNING: push to '$remoteName' failed after 3 attempts" }
 }
 "done: $newBranch @ $TargetVersion"
