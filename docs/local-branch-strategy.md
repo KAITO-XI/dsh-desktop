@@ -25,10 +25,12 @@
 |---|---|---|
 | `origin` | `https://github.com/anywhere-labs/deepseek-harness-desktop.git`（上游） | **只 fetch，永不 push** |
 | `mirror` | `https://ghfast.top/https://github.com/anywhere-labs/deepseek-harness-desktop.git`（镜像兜底） | 只 fetch |
-| `fork` | `https://github.com/KAITO-XI/dsh-desktop-local.git`（私有镜像仓） | push 本地补丁分支 |
+| `fork` | `https://github.com/KAITO-XI/deepseek-harness-desktop.git`（个人 fork，**公开**） | push 本地补丁分支 |
+| `backup` | `https://github.com/KAITO-XI/dsh-desktop-local.git`（私有镜像仓） | 冗余备份，可选 push |
 
-- `fork` 是私有独立仓库（非 GitHub fork：上游 org 限制了 OAuth App 的 fork 权限，GCM 的 gho_ token 建不了 fork，但可建普通仓库）。若将来需要真正的 fork 关联，在浏览器手动点一次 Fork 后把远端换过去即可。
-- 本地补丁分支**只推 `fork`**。
+- `fork` 是上游仓库的正式 GitHub fork（2026-09-21 在浏览器手动创建：上游 org 限制了 OAuth App 权限，GCM 的 `gho_` token 建不了 fork，只能建普通仓库）。因此**补丁分支在公开仓库可见**，该公开性已确认接受。
+- `backup` 是私有镜像仓，与 `fork` 内容一致时以 `fork` 为准；两者都保留，互为冗余。
+- 本地补丁分支推送顺序：先 `fork`（权威），再 `backup`（冗余）。
 - 网络注意：GitHub 直连时断时续，fetch/push 失败先重试，再切换 `mirror`（fetch）/ 等待窗口期（push 只能走 `fork` 直连）。
 - 提交身份用 `KAITO-XI <KAITO-XI@users.noreply.github.com>`，避免泄漏企业邮箱。
 
@@ -66,6 +68,7 @@ scripts/sync-local-patches.ps1 -Check    # 只报告漂移，不改动
 
 ## 6. 当前状态（同步更新于每次 sync）
 
-- 基线：`v2.0.13`
+- 基线：`v2.0.13`（已确认位于上游 `master` 历史中，fork 默认设置即可携带该基线）
 - 分支：`local/pi-ai-model-patch`
+- 远端：`fork` = 公开 fork `KAITO-XI/deepseek-harness-desktop`；`backup` = 私有镜像 `KAITO-XI/dsh-desktop-local`
 - 补丁：`pi-ai-model-patch`（pi-ai 0.85.1 `opencode-go.json` 新增 `deepseek-v4.1-flash` 模型条目，经 `resolutions + patches/` 机制接入）
