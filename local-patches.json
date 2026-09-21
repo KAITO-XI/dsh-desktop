@@ -23,6 +23,25 @@
         "package.json",
         "yarn.lock"
       ]
+    },
+    {
+      "id": "opencode-go-search-proxy",
+      "summary": "web_search through OpenCode Go: the search provider cannot send the x-opencode-session header the gateway requires, so a local reverse proxy (127.0.0.1:8787) injects it",
+      "mechanism": "machine-local deployment: tools/opencode-go-proxy/proxy.js + scripts/setup-opencode-search-proxy.ps1 writes ~/.dsh/opencode-go-proxy/, the Startup launcher, and the web-search-deepseek section of ~/.dsh/settings.yaml",
+      "docs": "docs/web-search-opencode-go.md",
+      "files": [
+        "tools/opencode-go-proxy/proxy.js",
+        "scripts/setup-opencode-search-proxy.ps1",
+        "docs/web-search-opencode-go.md"
+      ]
+    }
+  ],
+  "machineSetup": [
+    {
+      "name": "opencode-go search proxy (files + autostart + settings + start)",
+      "script": "scripts/setup-opencode-search-proxy.ps1",
+      "checkFlag": "-Check",
+      "notes": "Idempotent. Needs Node on PATH and OPENCODE_GO_API_KEY in the DSH credential store."
     }
   ],
   "verify": [
@@ -30,6 +49,16 @@
       "name": "pi-ai patched model present after install+build",
       "file": "dsh-plugin-desktop/node_modules/@earendil-works/pi-ai/dist/providers/data/opencode-go.json",
       "mustContain": "deepseek-v4.1-flash"
+    },
+    {
+      "name": "search proxy carries the session header injection",
+      "file": "tools/opencode-go-proxy/proxy.js",
+      "mustContain": "x-opencode-session"
+    },
+    {
+      "name": "settings.yaml carries the web-search section",
+      "file": "~/.dsh/settings.yaml",
+      "mustContain": "web-search-deepseek"
     }
   ],
   "build": {

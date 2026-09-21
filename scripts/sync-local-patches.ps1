@@ -34,6 +34,7 @@ param(
   [string]$TargetVersion,
   [switch]$Check,
   [switch]$SkipBuild,
+  [switch]$SkipMachineSetup,
   [string]$YarnJs,
   [string]$Registry = 'https://nexus.uihcloud.cn/repository/npm-group/'
 )
@@ -44,6 +45,25 @@ Set-Location $repo
 $manifestPath = Join-Path $repo 'local-patches.json'
 if (!(Test-Path $manifestPath)) { throw "manifest not found: $manifestPath" }
 $manifest = Get-Content $manifestPath -Raw | ConvertFrom-Json
+
+# --- 0. machine-local setup (always, independent of drift) ----------------------
+# A fresh machine starts already "in sync" (baseline == installed version), so this must
+# run before the drift check or provisioning would silently never happen.
+if ($manifest.machineSetup) {
+  if ($SkipMachineSetup) {
+    "SkipMachineSetup set - skipped $($manifest.machineSetup.Count) machine setup step(s)"
+  } else {
+    foreach ($step in $manifest.machineSetup) {
+      $scriptPath = Join-Path $repo $step.script
+      if (!(Test-Path $scriptPath)) { throw "machine setup script missing: $($step.script)" }
+      "machine setup: $($step.name)"
+      $stepArgs = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $scriptPath)
+      if ($Check -and $step.checkFlag) { $stepArgs += $step.checkFlag }
+      & powershell.exe @stepArgs
+      if ($LASTEXITCODE -ne 0) { throw "machine setup failed: $($step.name)" }
+    }
+  }
+}
 
 # --- 1. resolve target version -------------------------------------------------
 if (-not $TargetVersion) {
@@ -135,7 +155,9 @@ if ($YarnJs) {
 # --- 6. verify -----------------------------------------------------------------
 $failed = @()
 foreach ($rule in $manifest.verify) {
-  $file = Join-Path $repo $rule.file
+  $raw = [string]$rule.file
+  if ($raw.StartsWith('~')) { $raw = $env:USERPROFILE + $raw.Substring(1) }
+  $file = if ([IO.Path]::IsPathRooted($raw)) { $raw } else { Join-Path $repo $raw }
   if (!(Test-Path $file)) { $failed += "$($rule.name): file missing $($rule.file)"; continue }
   $content = Get-Content $file -Raw
   $ok = $true

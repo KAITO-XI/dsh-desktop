@@ -70,6 +70,8 @@ scripts/sync-local-patches.ps1 -Check    # 只报告漂移，不改动
 ## 6. 当前状态（同步更新于每次 sync）
 
 - 基线：`v2.0.13`（= `a782502`，已确认位于上游 `master` 历史中，fork 默认设置即可携带该基线）
-- 分支：`local/pi-ai-model-patch`
+- 分支：`local/pi-ai-model-patch`（当前承载两个主题；主题清单以 `local-patches.json` 的 `patches` 为准，分支名待主题继续增加时再拆分为 `local/v<版本>-patches` 集成分支）
 - 远端：`fork` = 公开 fork `KAITO-XI/dsh-desktop`；`backup` = 私有镜像 `KAITO-XI/dsh-desktop-local`；上游规范名 `anywhere-labs/dsh-desktop`
-- 补丁：`pi-ai-model-patch`（pi-ai 0.85.1 `opencode-go.json` 新增 `deepseek-v4.1-flash` 模型条目，经 `resolutions + patches/` 机制接入）
+- 补丁 1 `pi-ai-model-patch`：pi-ai 0.85.1 `opencode-go.json` 新增 `deepseek-v4.1-flash` 模型条目，经 `resolutions + patches/` 机制接入（**仓库内**）
+- 补丁 2 `opencode-go-search-proxy`：让 `web_search` 经 OpenCode Go 工作——搜索 provider 无法注入网关要求的 `x-opencode-session`，故用本地反代补头。仓库内存放代理与部署脚本，实际部署物在机器本地（**仓库外**：`~/.dsh/opencode-go-proxy/`、Startup 自启、`~/.dsh/settings.yaml`），由 `local-patches.json` 的 `machineSetup` 声明、sync 时自动执行；详见 `docs/web-search-opencode-go.md`
+- 机器本地依赖（不在仓库内，换机器需重新具备）：DSH 凭据库中的 `OPENCODE_GO_API_KEY`、Node 运行时、运行中的代理进程
