@@ -3,6 +3,10 @@
   "policy": "patch-stack",
   "strategyDoc": "docs/local-branch-strategy.md",
   "syncScript": "scripts/sync-local-patches.ps1",
+  "runbooks": {
+    "launch-from-source": "docs/launch-from-source.md",
+    "web-search-opencode-go": "docs/web-search-opencode-go.md"
+  },
   "baseline": "v2.0.13",
   "branch": "local/pi-ai-model-patch",
   "pushRemote": "fork",
