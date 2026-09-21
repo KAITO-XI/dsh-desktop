@@ -25,8 +25,9 @@
 |---|---|---|
 | `origin` | `https://github.com/anywhere-labs/deepseek-harness-desktop.git`（上游） | **只 fetch，永不 push** |
 | `mirror` | `https://ghfast.top/https://github.com/anywhere-labs/deepseek-harness-desktop.git`（镜像兜底） | 只 fetch |
-| `fork` | `https://github.com/KAITO-XI/deepseek-harness-desktop.git`（个人 fork） | push 本地补丁分支 |
+| `fork` | `https://github.com/KAITO-XI/dsh-desktop-local.git`（私有镜像仓） | push 本地补丁分支 |
 
+- `fork` 是私有独立仓库（非 GitHub fork：上游 org 限制了 OAuth App 的 fork 权限，GCM 的 gho_ token 建不了 fork，但可建普通仓库）。若将来需要真正的 fork 关联，在浏览器手动点一次 Fork 后把远端换过去即可。
 - 本地补丁分支**只推 `fork`**。
 - 网络注意：GitHub 直连时断时续，fetch/push 失败先重试，再切换 `mirror`（fetch）/ 等待窗口期（push 只能走 `fork` 直连）。
 - 提交身份用 `KAITO-XI <KAITO-XI@users.noreply.github.com>`，避免泄漏企业邮箱。

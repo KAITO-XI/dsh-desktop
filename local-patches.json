@@ -6,6 +6,7 @@
   "baseline": "v2.0.13",
   "branch": "local/pi-ai-model-patch",
   "pushRemote": "fork",
+  "pushUrl": "https://github.com/KAITO-XI/dsh-desktop-local.git",
   "neverPushRemotes": ["origin", "mirror"],
   "installedAppProbe": "C:\\Program Files\\DSH Desktop\\resources\\app\\package.json",
   "patches": [

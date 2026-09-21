@@ -34,6 +34,6 @@ This repository owns the desktop product around an unmodified DeepSeek Harness c
 
 - This checkout carries local-only commits on top of an upstream release tag. Read `local-patches.json` (baseline tag, patch list, verify rules) and `docs/local-branch-strategy.md` before creating or moving any branch. The baseline follows the *installed* DSH Desktop release tag, never `main`.
 - Agents must auto-detect drift on arrival: compare `baseline` in `local-patches.json` against the version at `installedAppProbe`. On mismatch, propose `scripts/sync-local-patches.ps1 -Check` first, then run it without `-Check` to fetch the tag, cherry-pick the patch stack, rebuild, verify, and refresh the manifest.
-- Local patch branches are pushed only to the `fork` remote. Never push `origin` (upstream) or `mirror`.
+- Local patch branches are pushed only to the `fork` remote (private mirror repo `KAITO-XI/dsh-desktop-local`; a true fork is impossible with the stored OAuth token because the upstream org restricts OAuth Apps). Never push `origin` (upstream) or `mirror`.
 - Any new local customization must land as its own commit series, update `local-patches.json` (`patches` + `verify`), and, when it changes the workflow, `docs/local-branch-strategy.md`.
 - Generated build artifacts that dirty the tree (for example `dsh-plugin-desktop/build/app-icon.ico`) should be restored with `git restore` before committing.
